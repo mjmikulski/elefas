@@ -1,10 +1,12 @@
 from ..engine import *
 
-class Linear(BoundedH):
-    def __init__(self, name, a, b, n=None, step=None):
-        super().__init__(name, a, b, n, step)
 
 
-class Geometric(BoundedH):
-    def __init__(self, name, a, b, n=None, step=None):
-        super().__init__(name, a, b, n, step)
+class Linear(NumericH):
+    def __init__(self, name, start, stop):
+        super().__init__(name, start, stop)
+
+
+class Exponential(NumericH):
+    def __init__(self, name, start, stop):
+        super().__init__(name, start, stop)

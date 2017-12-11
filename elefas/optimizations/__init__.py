@@ -1,1 +1,2 @@
-from .discrete import *
+from .grid_search import *
+from .random_search import *
