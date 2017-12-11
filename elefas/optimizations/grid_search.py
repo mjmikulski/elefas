@@ -13,6 +13,7 @@ class GridSearch(Search):
     def __init__(self):
         self.hs = []
         self.ranges = []
+        self.constrains = []
         self.compiled = False
 
         self.n_accessed = 0
@@ -21,12 +22,12 @@ class GridSearch(Search):
     def add(self, hparam, n=None, step=None):
         if self.compiled:
             raise RuntimeError('You cannot add hyper-parameters after space was compiled')
-
+    
         h = deepcopy(hparam)
-
-        points = []
-
+        
+        
         if isinstance(h, NumericH):
+            points = []
             if n is not None and step is not None: raise ValueError('You can pass either number of points to explore or step, not both.')
             if n is None and step is None: n = 5
             if n is not None:
@@ -62,13 +63,18 @@ class GridSearch(Search):
                     points.append(h.stop)
 
             h.values = points
+            self.hs.append(h)
+            self.ranges.append(len(h.values))
+
         elif isinstance(h, Choice):
-            pass
+            self.hs.append(h)
+            self.ranges.append(len(h.values))
+
+        elif isinstance(h, Constraint):
+            self.constrains.append(h)
         else:
             raise TypeError('Unexpected hyperparameter added to GridSearch')
 
-        self.hs.append(h)
-        self.ranges.append(len(h.values))
 
     def compile(self):
         self.compiled = True
@@ -79,22 +85,37 @@ class GridSearch(Search):
         if not self.compiled: raise RuntimeError('Compile space before accessing points')
 
         while not self.hp.done:
-            self.n_accessed += 1
             pos = self.hp.get()
             d = OrderedDict()
             for i, h in enumerate(self.hs):
                 d[h.name] = h.values[pos[i]]
-            yield d
+            if self.satisfy_constraints(d):
+                self.n_accessed += 1
+                yield d
             self.hp.move()
 
     def summary(self, print_fn=print):
         s = '=' * 80 + '\n'
         s += 'Hyper-parameters:\n'
         for h in self.hs:
-            s += '  {:>3}  {:20} {} \n'.format(len(h.values), h.name, str(list(h.values)))
+            s += '  {:>4}  {:20} {} \n'.format(len(h.values), h.name, str(list(h.values)))
+
+        if len(self.constrains) > 0:
+            from inspect import signature
+            s += 'Constraints:\n'
+            for c in self.constrains:
+                s += '        {:20} {}\n'.format(c.name, signature(c.f))
 
         s += '-' * 80 + '\n'
         s += 'Total number of points: {}'.format(self.n_total) + '\n'
         s += 'Points accessed: {}'.format(self.n_accessed) + '\n'
         s += '=' * 80 + '\n'
         print_fn(s)
+
+    def satisfy_constraints(self, d):
+        for c in self.constrains:
+            kwargs = {k: d[k] for k in d if k in c.hparams}
+            if not c.f(**kwargs):
+                return False
+
+        return True

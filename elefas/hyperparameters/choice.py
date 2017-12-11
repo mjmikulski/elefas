@@ -12,3 +12,6 @@ class Choice(BaseH):
         super().__init__(name)
         self.values = values
 
+class Boolean(Choice):
+    def __init__(self, name):
+        super().__init__(name, values=[False, True])

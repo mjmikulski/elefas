@@ -3,9 +3,6 @@ from elefas.hyperparameters import Choice, Linear, Exponential
 
 space = GridSearch()
 
-
-# space.add(Constant('optimizer', 'adam'))
-
 space.add(Choice('activation', ['tanh', 'sigmoid', 'relu']))
 
 space.add(Linear('dense_dropout', 0.0, 0.6), n=7)
@@ -20,8 +17,4 @@ space.compile()
 for p in space():
     print(p)
 
-
 space.summary()
-
-
-print('Done.')
