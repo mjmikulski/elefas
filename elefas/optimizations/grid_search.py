@@ -22,49 +22,20 @@ class GridSearch(Search):
     def add(self, hparam, n=None, step=None):
         if self.compiled:
             raise RuntimeError('You cannot add hyper-parameters after space was compiled')
-    
-        h = deepcopy(hparam)
-        
-        
+
+        if isinstance(hparam.name, list):
+            names = hparam.name
+            for name in names:
+                h = deepcopy(hparam)
+                h.name = name
+                self._add(h, n, step)
+        else:
+            h = deepcopy(hparam)
+            self._add(h, n, step)
+
+    def _add(self, h, n, step):
         if isinstance(h, NumericH):
-            points = []
-            if n is not None and step is not None: raise ValueError('You can pass either number of points to explore or step, not both.')
-            if n is None and step is None: n = 5
-            if n is not None:
-                if isinstance(h, Linear):
-                    if isinstance(h.start, int) and isinstance(h.stop, int):
-                        points = np.around(np.linspace(h.start, h.stop, num=n)).astype(int)
-                    else:
-                        points = np.linspace(h.start, h.stop, num=n)
-                elif isinstance(h, Exponential):
-                    if isinstance(h.start, int) and isinstance(h.stop, int):
-                        points = np.around(np.geomspace(h.start, h.stop, num=n)).astype(int)
-                    else:
-                        points = np.geomspace(h.start, h.stop, num=n)
-
-            elif step is not None:
-                scale = 3 - int(floor(log10(step)))
-                def mold(x):
-                    return round(x, scale)
-
-                if isinstance(h, Linear):
-                    points = [h.start]
-                    x = mold(h.start + step)
-                    while x < h.stop:
-                        points.append(x)
-                        x = mold(x + step)
-                    points.append(h.stop)
-                elif isinstance(h, Exponential):
-                    points = [h.start]
-                    x = h.start * step
-                    while x < h.stop:
-                        points.append(x)
-                        x *= step
-                    points.append(h.stop)
-
-            h.values = points
-            self.hs.append(h)
-            self.ranges.append(len(h.values))
+            self._add_numeric(h, n, step)
 
         elif isinstance(h, Choice):
             self.hs.append(h)
@@ -75,6 +46,46 @@ class GridSearch(Search):
         else:
             raise TypeError('Unexpected hyperparameter added to GridSearch')
 
+    def _add_numeric(self, h, n, step):
+        points = []
+        if n is not None and step is not None: raise ValueError(
+            'You can pass either number of points to explore or step, not both.')
+        if n is None and step is None: n = 5
+        if n is not None:
+            if isinstance(h, Linear):
+                if isinstance(h.start, int) and isinstance(h.stop, int):
+                    points = np.around(np.linspace(h.start, h.stop, num=n)).astype(int)
+                else:
+                    points = np.linspace(h.start, h.stop, num=n)
+            elif isinstance(h, Exponential):
+                if isinstance(h.start, int) and isinstance(h.stop, int):
+                    points = np.around(np.geomspace(h.start, h.stop, num=n)).astype(int)
+                else:
+                    points = np.geomspace(h.start, h.stop, num=n)
+
+        elif step is not None:
+            scale = 3 - int(floor(log10(step)))
+
+            def mold(x):
+                return round(x, scale)
+
+            if isinstance(h, Linear):
+                points = [h.start]
+                x = mold(h.start + step)
+                while x < h.stop:
+                    points.append(x)
+                    x = mold(x + step)
+                points.append(h.stop)
+            elif isinstance(h, Exponential):
+                points = [h.start]
+                x = h.start * step
+                while x < h.stop:
+                    points.append(x)
+                    x *= step
+                points.append(h.stop)
+        h.values = points
+        self.hs.append(h)
+        self.ranges.append(len(h.values))
 
     def compile(self):
         self.compiled = True
