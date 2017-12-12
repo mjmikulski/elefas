@@ -52,27 +52,32 @@ class GridSearch(Search):
             raise TypeError('Unexpected hyperparameter added to GridSearch')
 
     def _add_numeric(self, h, n, step):
+        def mold(x):
+            return round(x, scale)
+
         points = []
         if n is not None and step is not None: raise ValueError(
             'You can pass either number of points to explore or step, not both.')
         if n is None and step is None: n = 5
         if n is not None:
+
             if isinstance(h, Linear):
+                scale = 3 - int(floor(log10((h.stop - h.start) / n)))
                 if isinstance(h.start, int) and isinstance(h.stop, int):
-                    points = np.around(np.linspace(h.start, h.stop, num=n)).astype(int)
+                    points = np.around(np.linspace(h.start, h.stop, num=n)).astype(int).tolist()
                 else:
-                    points = np.linspace(h.start, h.stop, num=n)
+                    points = np.linspace(h.start, h.stop, num=n).tolist()
+                    points = list(map(mold, points))
             elif isinstance(h, Exponential):
+                scale = 3 - int(floor(log10(h.start)))
                 if isinstance(h.start, int) and isinstance(h.stop, int):
-                    points = np.around(np.geomspace(h.start, h.stop, num=n)).astype(int)
+                    points = np.around(np.geomspace(h.start, h.stop, num=n)).astype(int).tolist()
                 else:
-                    points = np.geomspace(h.start, h.stop, num=n)
+                    points = np.geomspace(h.start, h.stop, num=n).tolist()
+                    points = list(map(mold, points))
 
         elif step is not None:
             scale = 3 - int(floor(log10(step)))
-
-            def mold(x):
-                return round(x, scale)
 
             if isinstance(h, Linear):
                 points = [h.start]
