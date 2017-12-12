@@ -5,7 +5,7 @@ import numpy as np
 
 from math import log10, floor
 
-from ..engine import Search, HyperPointer, elegant_numbers as en
+from ..engine import Search, HyperPointer
 from ..hyperparameters import *
 
 
@@ -14,6 +14,8 @@ class GridSearch(Search):
         self.hs = []
         self.ranges = []
         self.constrains = []
+        self.dependent = []
+
         self.compiled = False
 
         self.n_accessed = 0
@@ -43,6 +45,9 @@ class GridSearch(Search):
 
         elif isinstance(h, Constraint):
             self.constrains.append(h)
+
+        elif isinstance(h, Dependent):
+            self.dependent.append(h)
         else:
             raise TypeError('Unexpected hyperparameter added to GridSearch')
 
@@ -100,6 +105,8 @@ class GridSearch(Search):
             d = OrderedDict()
             for i, h in enumerate(self.hs):
                 d[h.name] = h.values[pos[i]]
+            for h in self.dependent:
+                d[h.name] = h.f(**{k: d[k] for k in d if k in h.hparams})
             if self.satisfy_constraints(d):
                 self.n_accessed += 1
                 yield d

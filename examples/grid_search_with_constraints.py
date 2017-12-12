@@ -9,10 +9,10 @@ space.add(Boolean('Nesterov'))
 space.add(Exponential('batch_size', start=10, stop=1000), step=4)
 
 # no point for Nesterov if no momentum
-space.add(Constraint('pointless_nesterov',['momentum', 'Nesterov'], f=lambda momentum, Nesterov: not (Nesterov and momentum == 0)))
+space.add(Constraint('pointless_nesterov', f=lambda momentum, Nesterov: not (Nesterov and momentum == 0)))
 
 # skip models that we think will converge to slowly
-space.add(Constraint('learning_speed',['learning_rate', 'batch_size'], f=lambda learning_rate, batch_size: learning_rate/batch_size > 1.E-6))
+space.add(Constraint('learning_speed', f=lambda learning_rate, batch_size: learning_rate/batch_size > 1.E-6))
 
 
 space.compile()
