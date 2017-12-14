@@ -45,6 +45,7 @@ class GridSearch(Search):
 
         elif isinstance(h, Constraint):
             self.constrains.append(h)
+            h.n_points_rejected = 0
 
         elif isinstance(h, Dependent):
             self.dependent.append(h)
@@ -127,7 +128,7 @@ class GridSearch(Search):
             from inspect import signature
             s += 'Constraints:\n'
             for c in self.constrains:
-                s += '        {:20} {}\n'.format(c.name, signature(c.f))
+                s += '{:>6}  {:20} {}\n'.format(c.n_points_rejected, c.name, signature(c.f))
 
         s += '-' * 80 + '\n'
         s += 'Total number of points: {}'.format(self.n_total) + '\n'
@@ -139,6 +140,7 @@ class GridSearch(Search):
         for c in self.constrains:
             kwargs = {k: d[k] for k in d if k in c.hparams}
             if not c.f(**kwargs):
+                c.n_points_rejected += 1
                 return False
 
         return True
