@@ -1,7 +1,7 @@
 from elefas.hyperparameters import Boolean, Linear, Exponential, Constraint
-from elefas.optimizations import GridSearch
+from elefas.optimizations import Grid
 
-space = GridSearch()
+space = Grid()
 
 space.add(Exponential('learning_rate', 1.0E-5, 0.1))
 space.add(Linear('momentum', 0, 0.9), n=3)

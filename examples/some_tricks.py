@@ -1,7 +1,7 @@
 from elefas.hyperparameters import Linear, Choice, Dependent
-from elefas.optimizations import GridSearch
+from elefas.optimizations import Grid
 
-space = GridSearch()
+space = Grid()
 
 # Add a few hyper-parameters that take the same values, but are independent.
 space.add(Choice(['dense01_activation', 'dense02_activation'], ['tanh', 'sigmoid', 'relu']))
@@ -17,5 +17,5 @@ space.compile()
 for p in space():
     print(p)
 
-
 space.summary()
+

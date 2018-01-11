@@ -1,7 +1,7 @@
-from elefas.optimizations import GridSearch
+from elefas.optimizations import Grid
 from elefas.hyperparameters import Choice, Linear, Exponential
 
-space = GridSearch()
+space = Grid()
 
 space.add(Choice('activation', ['tanh', 'sigmoid', 'relu']))
 
