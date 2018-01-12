@@ -8,7 +8,7 @@ class Constant(BaseH):
 
 
 class Choice(BaseH):
-    def __init__(self, name, values):
+    def __init__(self, name, values:list):
         super().__init__(name)
         self.values = values
 

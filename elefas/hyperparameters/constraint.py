@@ -9,3 +9,6 @@ class Constraint(BaseH):
         self.f = f
         self.hparams = getfullargspec(f).args
 
+    def __str__(self):
+        return f'{self.name} <Constraint that depends on {self.hparams}>'
+

@@ -1,4 +1,7 @@
 class Search:
+    """
+    This is a base class for all searches. It should not be instantiated. Use concrete implementations instead.
+    """
     def __init__(self):
         self.dependent = []
         self.constrains = []
@@ -11,7 +14,6 @@ class Search:
         for c in self.constrains:
             kwargs = {k: d[k] for k in d if k in c.hparams}
             if not c.f(**kwargs):
-                c.n_points_rejected += 1
                 return False
         return True
 

@@ -14,7 +14,7 @@ class Grid(Search):
         self.n_total = 0
         self.hp = None
 
-    def add(self, hparam, n=None, step=None):
+    def add(self, hparam, *, n=None, step=None):
         if self.compiled:
             raise RuntimeError('You cannot add hyper-parameters after space was compiled')
 
@@ -83,11 +83,11 @@ class Grid(Search):
             return round(x, scale)
 
         points = []
-        if n is not None and step is not None: raise ValueError(
-            'You can pass either number of points to explore or step, not both.')
-        if n is None and step is None: n = 5
+        if n is not None and step is not None:
+            raise ValueError('You can pass either number of points to explore or step, not both.')
+        if n is None and step is None:
+            n = 5
         if n is not None:
-
             if isinstance(h, Linear):
                 scale = 3 - int(floor(log10((h.stop - h.start) / n)))
                 if isinstance(h.start, int) and isinstance(h.stop, int):
