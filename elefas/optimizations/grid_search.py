@@ -76,11 +76,11 @@ class Grid(Search):
         elif isinstance(h, Dependent):
             self.dependent.append(h)
         else:
-            raise TypeError('Unexpected hyperparameter added to GridSearch')
+            raise TypeError('Unexpected hyperparameter added to Grid search')
 
     def _add_numeric(self, h, n, step):
         def mold(x):
-            return round(x, scale)
+            return round(x, magn)
 
         points = []
         if n is not None and step is not None:
@@ -89,14 +89,14 @@ class Grid(Search):
             n = 5
         if n is not None:
             if isinstance(h, Linear):
-                scale = 3 - int(floor(log10((h.stop - h.start) / n)))
+                magn = magnitude((h.stop - h.start) / n)
                 if isinstance(h.start, int) and isinstance(h.stop, int):
                     points = np.around(np.linspace(h.start, h.stop, num=n)).astype(int).tolist()
                 else:
                     points = np.linspace(h.start, h.stop, num=n).tolist()
                     points = list(map(mold, points))
             elif isinstance(h, Exponential):
-                scale = 3 - int(floor(log10(h.start)))
+                magn = magnitude(h.start)
                 if isinstance(h.start, int) and isinstance(h.stop, int):
                     points = np.around(np.geomspace(h.start, h.stop, num=n)).astype(int).tolist()
                 else:
@@ -104,7 +104,7 @@ class Grid(Search):
                     points = list(map(mold, points))
 
         elif step is not None:
-            scale = 3 - int(floor(log10(step)))
+            magn = magnitude(step)
 
             if isinstance(h, Linear):
                 points = [h.start]
