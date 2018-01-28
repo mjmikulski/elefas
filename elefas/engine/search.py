@@ -3,9 +3,10 @@ class Search:
     This is a base class for all searches. It should not be instantiated. Use concrete implementations instead.
     """
     def __init__(self):
+        self.h_params = []
         self.dependent = []
         self.constrains = []
-        self.hs = []
+
         self.n_accessed = 0
 
         self.compiled = False

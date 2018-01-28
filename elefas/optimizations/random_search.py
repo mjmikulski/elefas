@@ -7,31 +7,31 @@ from ..hyperparameters import *
 
 
 class Random(Search):
-    def __init__(self, num_points=math.inf):
+    def __init__(self, points=math.inf):
         super().__init__()
-        self.num_points = num_points
+        self.n_points = points
 
-    def add(self, hparam):
+    def add(self, h_param):
         if self.compiled:
             raise RuntimeError('You cannot add hyper-parameters after space was compiled')
 
-        if isinstance(hparam.name, list):
-            names = hparam.name
+        if isinstance(h_param.name, list):
+            names = h_param.name
             for name in names:
-                h = deepcopy(hparam)
+                h = deepcopy(h_param)
                 h.name = name
                 self._add(h)
         else:
-            h = deepcopy(hparam)
+            h = deepcopy(h_param)
             self._add(h)
 
     def __call__(self, *args, **kwargs):
         if not self.compiled:
             raise RuntimeError('Compile space before accessing points')
 
-        while self.n_accessed < self.num_points:
+        while self.n_accessed < self.n_points:
             d = OrderedDict()
-            for h in self.hs:
+            for h in self.h_params:
                 if isinstance(h, Choice):
                     d[h.name] = random.choice(h.values)
                 elif isinstance(h, Linear):
@@ -58,11 +58,11 @@ class Random(Search):
         pass
 
     def _add(self, h):
-        if isinstance(h, NumericH):
-            self.hs.append(h)
+        if isinstance(h, NumericHyperParameter):
+            self.h_params.append(h)
 
         elif isinstance(h, Choice):
-            self.hs.append(h)
+            self.h_params.append(h)
 
         elif isinstance(h, Constraint):
             self.constrains.append(h)

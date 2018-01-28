@@ -1,10 +1,10 @@
 from inspect import getfullargspec
 
-from ..engine import BaseH
+from ..engine import BaseHyperParameter
 
 
-class Dependent(BaseH):
+class Dependent(BaseHyperParameter):
     def __init__(self, name, f):
         super().__init__(name)
         self.f = f
-        self.hparams = getfullargspec(f).args
+        self.superior_h_params = getfullargspec(f).args

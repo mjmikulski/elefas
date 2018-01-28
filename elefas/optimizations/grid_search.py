@@ -10,43 +10,43 @@ from ..hyperparameters import *
 class Grid(Search):
     def __init__(self):
         super().__init__()
-        self.ranges = []
+        self.spectra = []
+        self.hyper_pointer = None
         self.n_total = 0
-        self.hp = None
 
-    def add(self, hparam, *, n=None, step=None):
+    def add(self, h_param, *, n=None, step=None):
         if self.compiled:
             raise RuntimeError('You cannot add hyper-parameters after space was compiled')
 
-        if isinstance(hparam.name, list):
-            names = hparam.name
+        if isinstance(h_param.name, list):
+            names = h_param.name
             for name in names:
-                h = deepcopy(hparam)
+                h = deepcopy(h_param)
                 h.name = name
                 self._add(h, n, step)
         else:
-            h = deepcopy(hparam)
+            h = deepcopy(h_param)
             self._add(h, n, step)
 
     def __call__(self, *args, **kwargs):
         if not self.compiled: raise RuntimeError('Compile space before accessing points')
 
-        while not self.hp.done:
-            pos = self.hp.get()
+        while not self.hyper_pointer.done:
+            pos = self.hyper_pointer.get()
             d = OrderedDict()
-            for i, h in enumerate(self.hs):
+            for i, h in enumerate(self.h_params):
                 d[h.name] = h.values[pos[i]]
             for h in self.dependent:
-                d[h.name] = h.f(**{k: d[k] for k in d if k in h.hparams})
+                d[h.name] = h.f(**{k: d[k] for k in d if k in h.superior_h_params})
             if self._satisfy_constraints(d):
                 self.n_accessed += 1
                 yield d
-            self.hp.move()
+            self.hyper_pointer.move()
 
     def summary(self, print_fn=print):
         s = '_' * 80 + '\n'
         s += 'Hyper-parameters:\n'
-        for h in self.hs:
+        for h in self.h_params:
             s += '  {:>4}  {:20} {} \n'.format(len(h.values), h.name, str(list(h.values)))
 
         if len(self.constrains) > 0:
@@ -62,12 +62,12 @@ class Grid(Search):
         print_fn(s)
 
     def _add(self, h, n, step):
-        if isinstance(h, NumericH):
+        if isinstance(h, NumericHyperParameter):
             self._add_numeric(h, n, step)
 
         elif isinstance(h, Choice):
-            self.hs.append(h)
-            self.ranges.append(len(h.values))
+            self.h_params.append(h)
+            self.spectra.append(len(h.values))
 
         elif isinstance(h, Constraint):
             self.constrains.append(h)
@@ -121,16 +121,16 @@ class Grid(Search):
                     x *= step
                 points.append(h.stop)
         h.values = points
-        self.hs.append(h)
-        self.ranges.append(len(h.values))
+        self.h_params.append(h)
+        self.spectra.append(len(h.values))
 
     def _compile(self):
-        self.hp = HyperPointer(self.ranges)
-        self.n_total = np.prod(self.ranges)
+        self.hyper_pointer = HyperPointer(self.spectra)
+        self.n_total = np.prod(self.spectra)
 
     def _satisfy_constraints(self, d):
         for c in self.constrains:
-            kwargs = {k: d[k] for k in d if k in c.hparams}
+            kwargs = {k: d[k] for k in d if k in c.constrained_h_params}
             if not c.f(**kwargs):
                 c.n_points_rejected += 1
                 return False

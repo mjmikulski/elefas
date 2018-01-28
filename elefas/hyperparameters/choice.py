@@ -1,16 +1,17 @@
-from ..engine import BaseH
+from ..engine import BaseHyperParameter
 
 
-class Constant(BaseH):
+class Constant(BaseHyperParameter):
     def __init__(self, name, value):
         super().__init__(name)
         self.value = value
 
 
-class Choice(BaseH):
+class Choice(BaseHyperParameter):
     def __init__(self, name, values:list):
         super().__init__(name)
         self.values = values
+
 
 class Boolean(Choice):
     def __init__(self, name):
