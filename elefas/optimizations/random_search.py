@@ -47,7 +47,7 @@ class Random(Search):
                         d[h.name] = v
 
             for h in self.dependent:
-                d[h.name] = h.f(**{k: d[k] for k in d if k in h.hparams})
+                d[h.name] = h.f(**{k: d[k] for k in d if k in h.superior_h_params})
             if self._satisfy_constraints(d):
                 self.n_accessed += 1
                 yield d
@@ -55,7 +55,17 @@ class Random(Search):
 
 
     def summary(self, print_fn=print):
-        pass
+        s = self._begin_summary()
+        for h in self.h_params:
+            s += '        {:20} {} \n'.format(h.name, h.__class__.__name__)
+
+        s += self._show_dependent()
+        s += self._show_constraints()
+
+        s += '=' * 80 + '\n'
+
+        s += self._end_summary()
+        print_fn(s)
 
     def _add(self, h):
         if isinstance(h, NumericHyperParameter):

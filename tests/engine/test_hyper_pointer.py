@@ -6,6 +6,7 @@ from elefas.engine import *
 class TestHyperPointer(unittest.TestCase):
     def test_content(self):
         hp = HyperPointer([7, 12, 3])
+
         results = []
         while not hp.done:
             results.append(hp.get())
@@ -20,7 +21,7 @@ class TestHyperPointer(unittest.TestCase):
         self.assertIn((6,11,2), results) # last
 
 
-    def test_error(self):
+    def test_construction_errors(self):
         self.assertRaises(ValueError, HyperPointer, [3,1,2])
         self.assertRaises(ValueError, HyperPointer, [7,0])
         self.assertRaises(ValueError, HyperPointer, [1])

@@ -1,6 +1,5 @@
 from collections import OrderedDict
 from copy import deepcopy
-from math import log10, floor
 
 import numpy as np
 
@@ -44,21 +43,17 @@ class Grid(Search):
             self.hyper_pointer.move()
 
     def summary(self, print_fn=print):
-        s = '_' * 80 + '\n'
-        s += 'Hyper-parameters:\n'
+        s = self._begin_summary()
         for h in self.h_params:
             s += '  {:>4}  {:20} {} \n'.format(len(h.values), h.name, str(list(h.values)))
 
-        if len(self.constrains) > 0:
-            from inspect import signature
-            s += 'Constraints:\n'
-            for c in self.constrains:
-                s += '{:>6}  {:20} {}\n'.format(c.n_points_rejected, c.name, signature(c.f))
+        s += self._show_dependent()
+        s += self._show_constraints()
 
         s += '=' * 80 + '\n'
         s += 'Total number of points: {}'.format(self.n_total) + '\n'
-        s += 'Points accessed: {}'.format(self.n_accessed) + '\n'
-        s += '_' * 80 + '\n'
+
+        s += self._end_summary()
         print_fn(s)
 
     def _add(self, h, n, step):
