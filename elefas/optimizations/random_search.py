@@ -25,6 +25,22 @@ class Random(Search):
             h = deepcopy(h_param)
             self._add(h)
 
+    def _add(self, h):
+        if isinstance(h, NumericHyperParameter):
+            self.h_params.append(h)
+
+        elif isinstance(h, Choice):
+            self.h_params.append(h)
+
+        elif isinstance(h, Constraint):
+            self.constrains.append(h)
+            h.n_points_rejected = 0
+
+        elif isinstance(h, Dependent):
+            self.dependent.append(h)
+        else:
+            raise TypeError('Unexpected hyperparameter added to Random search')
+
     def __call__(self, *args, **kwargs):
         if not self.compiled:
             raise RuntimeError('Compile space before accessing points')
@@ -52,37 +68,8 @@ class Random(Search):
                 self.n_accessed += 1
                 yield d
 
-
-
-    def summary(self, print_fn=print):
-        s = self._begin_summary()
+    def _proper_summary(self):
+        s = ''
         for h in self.h_params:
             s += '        {:20} {} \n'.format(h.name, h.__class__.__name__)
-
-        s += self._show_dependent()
-        s += self._show_constraints()
-
-        s += '=' * 80 + '\n'
-
-        s += self._end_summary()
-        print_fn(s)
-
-    def _add(self, h):
-        if isinstance(h, NumericHyperParameter):
-            self.h_params.append(h)
-
-        elif isinstance(h, Choice):
-            self.h_params.append(h)
-
-        elif isinstance(h, Constraint):
-            self.constrains.append(h)
-            h.n_points_rejected = 0
-
-        elif isinstance(h, Dependent):
-            self.dependent.append(h)
-        else:
-            raise TypeError('Unexpected hyperparameter added to Random search')
-
-
-    def _compile(self):
-        pass
+        return s
