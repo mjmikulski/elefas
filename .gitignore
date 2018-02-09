@@ -103,3 +103,5 @@ ENV/
 
 # pycharm
 /.idea/workspace.xml
+/.idea/elefas.iml
+/.idea/misc.xml
