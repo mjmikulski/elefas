@@ -1,7 +1,11 @@
+import warnings
+
+
 class Search:
     """
     This is a base class for all searches. It should not be instantiated. Use concrete implementations instead.
     """
+
     def __init__(self):
         self.h_params = []
         self.dependent = []
@@ -12,7 +16,7 @@ class Search:
 
     def compile(self):
         if self.compiled:
-            raise RuntimeError('Already compiled')
+            warnings.warn('Model has been already compiled', RuntimeWarning, stacklevel=2)
         else:
             self.compiled = True
             self._compile()
@@ -71,7 +75,3 @@ class Search:
                 c.n_points_rejected += 1
                 return False
         return True
-
-
-
-

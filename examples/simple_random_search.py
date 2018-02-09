@@ -1,5 +1,3 @@
-from time import sleep
-
 from elefas.hyperparameters import Choice, Linear, Exponential
 from elefas.optimizations import Random
 

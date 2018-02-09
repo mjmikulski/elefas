@@ -1,8 +1,10 @@
 from math import floor, log10
 import numpy as np
 
-def magnitude(x) -> int:
+
+def magnitude(x):
     return 3 - floor(log10(x))
+
 
 def normalize(x_train, x_test):
     mu = np.nanmean(x_train, axis=0)

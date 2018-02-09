@@ -1,32 +1,27 @@
 import math
-from sklearn import preprocessing
 
-from keras.models import Sequential
 from keras.datasets import boston_housing
-from keras.layers import Dense, Dropout, Activation, BatchNormalization
+from keras.layers import Dense, Dropout, Activation
+from keras.models import Sequential
 from keras.optimizers import SGD
 
-
-from elefas.optimizations import Random, Grid
-from elefas.hyperparameters import Linear, Exponential, Choice, Boolean, Constraint, Dependent
-
 from elefas.engine import normalize
+from elefas.hyperparameters import Linear, Exponential, Choice, Boolean, Constraint
+from elefas.optimizations import Random
 
 # prepare data:
 (x_train, y_train), (x_test, y_test) = boston_housing.load_data()
 x_train, x_test = normalize(x_train, x_test)
 
-
 print(f'x_train.shape: {x_train.shape}')
 print(f'x_test.shape: {x_test.shape}')
-
 
 # define hyper-parameters
 space = Random(100)
 
 space.add(Exponential('dense_1_units', 10, 100))
 space.add(Exponential('dense_2_units', 5, 50))
-space.add(Constraint('dense size should decrease', f= lambda dense_1_units, dense_2_units : dense_1_units > dense_2_units ))
+space.add(Constraint('dense size should decrease', f=lambda dense_1_units, dense_2_units: dense_1_units > dense_2_units))
 space.add(Choice(['activation_1', 'activation_2'], ['tanh', 'relu', 'sigmoid']))
 space.add(Linear('dropout', 0, 0.8))
 
