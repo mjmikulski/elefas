@@ -1,4 +1,5 @@
 import math
+import random
 
 from keras.datasets import boston_housing
 from keras.layers import Dense, Dropout, Activation
@@ -9,6 +10,10 @@ from elefas.engine import normalize
 from elefas.hyperparameters import Linear, Exponential, Choice, Boolean, Constraint
 from elefas.optimizations import Random
 
+
+# fix seed
+random.seed(11)
+
 # prepare data:
 (x_train, y_train), (x_test, y_test) = boston_housing.load_data()
 x_train, x_test = normalize(x_train, x_test)
@@ -17,20 +22,21 @@ print(f'x_train.shape: {x_train.shape}')
 print(f'x_test.shape: {x_test.shape}')
 
 # define hyper-parameters
-space = Random(100)
+space = Random(5000)
 
-space.add(Exponential('dense_1_units', 10, 100))
-space.add(Exponential('dense_2_units', 5, 50))
-space.add(Constraint('dense size should decrease', f=lambda dense_1_units, dense_2_units: dense_1_units > dense_2_units))
-space.add(Choice(['activation_1', 'activation_2'], ['tanh', 'relu', 'sigmoid']))
-space.add(Linear('dropout', 0, 0.8))
+space.add(Exponential('dense_1_units', 20, 100))
+space.add(Exponential('dense_2_units', 10, 50))
+space.add(Exponential('dense_3_units', 5, 25))
+space.add(Constraint('dense size should decrease', f=lambda dense_1_units, dense_2_units, dense_3_units: dense_1_units > dense_2_units > dense_3_units))
+space.add(Choice(['activation_1', 'activation_2', 'activation_3'], ['tanh', 'relu', 'sigmoid']))
+space.add(Linear('dropout', 0, 0.6))
 
-space.add(Exponential('lr', 1e-6, 1))
-space.add(Linear('momentum', 0, 0.999))
+space.add(Exponential('lr', 1e-5, 0.1))
+space.add(Linear('momentum', 0.1, 0.999))
 space.add(Boolean('nesterov'))
 
-space.add(Exponential('batch_size', 8, 128))
-space.add(Linear('epochs', 10, 500))
+space.add(Exponential('batch_size', 8, 64))
+space.add(Linear('epochs', 200, 500))
 
 space.compile()
 
@@ -38,6 +44,7 @@ best_loss = math.inf
 best_p = None
 
 for p in space():
+    print('Iteration: {} of {}'.format(space.n_accessed, space.n_points))
     print('Exploring: ', p)
 
     model = Sequential()
@@ -47,6 +54,10 @@ for p in space():
 
     model.add(Dense(units=p['dense_2_units']))
     model.add(Activation(p['activation_2']))
+    model.add(Dropout(p['dropout']))
+
+    model.add(Dense(units=p['dense_3_units']))
+    model.add(Activation(p['activation_3']))
     model.add(Dropout(p['dropout']))
 
     model.add(Dense(1))
@@ -75,5 +86,5 @@ for p in space():
 
     print('')
 
-print(f'Best loss so far is {best_loss:.2f} for {best_p}')
+print(f'Best is {best_loss:.2f} for {best_p}')
 space.summary()

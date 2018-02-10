@@ -1,4 +1,7 @@
+import time
 import warnings
+
+from .utils import rough_timedelta
 
 
 class Search:
@@ -13,6 +16,8 @@ class Search:
 
         self.n_accessed = 0
         self.compiled = False
+        self.time_start = 0
+        self.time_elapsed = 0
 
     def compile(self):
         if self.compiled:
@@ -20,6 +25,7 @@ class Search:
         else:
             self.compiled = True
             self._compile()
+        self.time_start = time.time()
 
     def _compile(self):
         pass
@@ -64,7 +70,8 @@ class Search:
         return s
 
     def _end_summary(self):
-        s = 'Points accessed: {}\n'.format(self.n_accessed)
+        self.time_elapsed = time.time() - self.time_start
+        s = 'Explored {} points in {}\n'.format(self.n_accessed, rough_timedelta(self.time_elapsed))
         s += '_' * 80 + '\n'
         return s
 

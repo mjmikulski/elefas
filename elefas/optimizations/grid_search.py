@@ -11,7 +11,7 @@ class Grid(Search):
         super().__init__()
         self.spectra = []
         self.hyper_pointer = None
-        self.n_total = 0
+        self.n_points = 0
 
     def add(self, h_param, *, n=None, step=None):
         if self.compiled:
@@ -46,7 +46,7 @@ class Grid(Search):
 
     def _compile(self):
         self.hyper_pointer = HyperPointer(self.spectra)
-        self.n_total = np.prod(self.spectra)
+        self.n_points = np.prod(self.spectra)
 
     def __call__(self, *args, **kwargs):
         if not self.compiled: raise RuntimeError('Compile space before accessing points')
@@ -72,7 +72,7 @@ class Grid(Search):
 
     def _end_summary(self):
         s = '=' * 80 + '\n'
-        s += 'Points accessed: {}/{}\n'.format(self.n_accessed, self.n_total)
+        s += 'Points accessed: {}/{}\n'.format(self.n_accessed, self.n_points)
         s += '_' * 80 + '\n'
         return s
 

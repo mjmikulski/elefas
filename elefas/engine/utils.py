@@ -14,3 +14,25 @@ def normalize(x_train, x_test):
     x_test_normalized = (x_test - mu) / std
 
     return x_train_normalized, x_test_normalized
+
+
+def rough_timedelta(seconds=0):
+    if seconds < 100:
+        return '{:.0f} seconds'.format(seconds)
+    if seconds < 600:
+        return '{:.0f} minutes {:.0f} seconds'.format(seconds // 60, seconds % 60)
+
+    minutes = seconds / 60
+    if minutes < 100:
+        return '{:.0f} minutes'.format(minutes)
+    if minutes < 600:
+        return '{:.0f} hours {:.0f} minutes'.format(minutes // 60, minutes % 60)
+
+    hours = minutes / 60
+    if hours < 100:
+        return '{:.0f} hours'.format(hours)
+    if hours < 240:
+        return '{:.0f} days {:.0f} hours'.format(hours // 24, hours % 24)
+
+    days = hours / 24
+    return '{:.0f} days'.format(days)
