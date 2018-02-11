@@ -22,7 +22,8 @@ print(f'x_train.shape: {x_train.shape}')
 print(f'x_test.shape: {x_test.shape}')
 
 # define hyper-parameters
-space = Random(100)
+from datetime import timedelta
+space = Random(time_limit=(timedelta(minutes=3)))
 
 space.add(Exponential('dense_1_units', 20, 100))
 space.add(Exponential('dense_2_units', 10, 50))

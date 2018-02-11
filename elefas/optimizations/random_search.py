@@ -3,14 +3,17 @@ import random
 from collections import OrderedDict
 from copy import deepcopy
 
+from datetime import timedelta
+
 from ..hyperparameters import *
 
 
 class Random(Search):
     MAX_TRIALS = 10000
-    def __init__(self, points=math.inf):
+    def __init__(self, points=math.inf, time_limit=math.inf):
         super().__init__()
         self.n_points = points
+        self.time_limit = time_limit.total_seconds() if isinstance(time_limit, timedelta) else time_limit
 
     def add(self, h_param):
         if self.compiled:
@@ -43,7 +46,7 @@ class Random(Search):
             raise TypeError('Unexpected hyperparameter added to Random search')
 
     def __next__(self):
-        if self.n_explored < self.n_points:
+        if self.n_explored < self.n_points and self.enough_time():
             self._next()
             return self.current_point
         else:
@@ -86,3 +89,12 @@ class Random(Search):
         for h in self.h_params:
             s += '        {:20} {} \n'.format(h.name, h.__class__.__name__)
         return s
+
+    def enough_time(self):
+        if self.n_explored < 2:
+            return True
+
+        mean_time_for_point = (time.time() - self.time_start) / self.n_explored
+        if time.time() + mean_time_for_point < self.time_start + self.time_limit:
+            return True
+        return False

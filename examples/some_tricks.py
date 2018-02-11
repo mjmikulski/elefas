@@ -1,8 +1,9 @@
+from time import sleep
+
 from elefas.hyperparameters import Linear, Choice, Dependent, Constraint
 from elefas.optimizations import Grid, Random
 
-space = Random(30)
-# space = Grid()
+space = Random(time_limit=15)
 
 # Add a few hyper-parameters that take the same values, but are independent.
 space.add(Choice(['dense01_activation', 'dense02_activation'], ['tanh', 'sigmoid', 'relu']))
@@ -18,6 +19,7 @@ space.compile()
 
 for p in space:
     print(p)
+    sleep(0.5)
 
 space.summary()
 

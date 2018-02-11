@@ -1,7 +1,7 @@
 from elefas.hyperparameters import Choice, Linear, Exponential
 from elefas.optimizations import Random
 
-space = Random(20)
+space = Random(points=20)
 
 space.add(Choice('initialization', ['zero', 'lecun_uniform', 'glorot_normal', 'he_normal']))
 
