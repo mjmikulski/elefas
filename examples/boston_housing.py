@@ -22,7 +22,7 @@ print(f'x_train.shape: {x_train.shape}')
 print(f'x_test.shape: {x_test.shape}')
 
 # define hyper-parameters
-space = Random(1000)
+space = Random(100)
 
 space.add(Exponential('dense_1_units', 20, 100))
 space.add(Exponential('dense_2_units', 10, 50))
@@ -44,8 +44,8 @@ space.compile()
 best_loss = math.inf
 best_p = None
 
-for p in space():
-    print('Iteration: {} of {}'.format(space.n_accessed, space.n_points))
+for p in space:
+    print('Iteration: {} of {}'.format(space.n_explored, space.n_points))
     print('Exploring: ', p)
 
     model = Sequential()

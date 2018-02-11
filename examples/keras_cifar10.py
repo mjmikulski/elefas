@@ -51,10 +51,10 @@ space.compile()
 best_accuracy = 0
 best_p = None
 
-for p in space():
+for p in space:
     print('Exploring: ', p)
 
-    model_name = 'keras_cifar10_trained_model-{:04d}.h5'.format(space.n_accessed)
+    model_name = 'keras_cifar10_trained_model-{:04d}.h5'.format(space.n_explored)
 
     model = Sequential()
     model.add(Conv2D(32, (3, 3), padding='same', input_shape=x_train.shape[1:]))

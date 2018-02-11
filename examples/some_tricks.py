@@ -12,11 +12,11 @@ space.add(Linear(['dense01_dropout', 'dense02_dropout'], 0., 0.6))
 space.add(Choice('dense01_dim', [64,128]))
 space.add(Dependent('dense02_dim', f=lambda dense01_dim: dense01_dim//2 ))
 
-space.add(Constraint('limited_dropout', f=lambda dense01_dropout, dense02_dim: dense01_dropout < 0.5 or dense02_dim > 50  ))
+space.add(Constraint('limited_dropout', f=lambda dense01_dropout, dense02_dim: dense01_dropout < 0.5 or dense02_dim > 50 ))
 
 space.compile()
 
-for p in space():
+for p in space:
     print(p)
 
 space.summary()

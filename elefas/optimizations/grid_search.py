@@ -48,23 +48,41 @@ class Grid(Search):
         self.hyper_pointer = HyperPointer(self.spectra)
         self.n_points = np.prod(self.spectra)
 
+    def __next__(self):
+        self._next()
+        return self.current_point
+
+    def _next(self):
+        while not self.hyper_pointer.done:
+            self.current_point = OrderedDict()
+            pos = self.hyper_pointer.get()
+            for i, h in enumerate(self.h_params):
+                self.current_point[h.name] = h.values[pos[i]]
+            self.hyper_pointer.move()
+
+            self._process_dependent()
+
+            if self._satisfy_constraints(self.current_point):
+                self.n_explored += 1
+                return
+        raise StopIteration
+
     def __call__(self, *args, **kwargs):
-        if not self.compiled: raise RuntimeError('Compile space before accessing points')
 
         while not self.hyper_pointer.done:
             pos = self.hyper_pointer.get()
-            d = OrderedDict()
+            self.current_point = OrderedDict()
             for i, h in enumerate(self.h_params):
-                d[h.name] = h.values[pos[i]]
-            for h in self.dependent:
-                d[h.name] = h.f(**{k: d[k] for k in d if k in h.superior_h_params})
-            if self._satisfy_constraints(d):
-                self.n_accessed += 1
-                yield d
+                self.current_point[h.name] = h.values[pos[i]]
+
+            self._process_dependent()
+
+            if self._satisfy_constraints(self.current_point):
+                self.n_explored += 1
+                yield self.current_point
             self.hyper_pointer.move()
 
-
-    def _proper_summary(self):
+    def _show_h_params(self):
         s = ''
         for h in self.h_params:
             s += '  {:>4}  {:20} {} \n'.format(len(h.values), h.name, str(list(h.values)))
@@ -72,7 +90,7 @@ class Grid(Search):
 
     def _end_summary(self):
         s = '=' * 80 + '\n'
-        s += 'Points accessed: {}/{}\n'.format(self.n_accessed, self.n_points)
+        s += 'Points accessed: {}/{}\n'.format(self.n_explored, self.n_points)
         s += '_' * 80 + '\n'
         return s
 

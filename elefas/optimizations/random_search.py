@@ -7,6 +7,7 @@ from ..hyperparameters import *
 
 
 class Random(Search):
+    MAX_TRIALS = 10000
     def __init__(self, points=math.inf):
         super().__init__()
         self.n_points = points
@@ -41,34 +42,46 @@ class Random(Search):
         else:
             raise TypeError('Unexpected hyperparameter added to Random search')
 
-    def __call__(self, *args, **kwargs):
-        if not self.compiled:
-            raise RuntimeError('Compile space before accessing points')
+    def __next__(self):
+        if self.n_explored < self.n_points:
+            self._next()
+            return self.current_point
+        else:
+            raise StopIteration
 
-        while self.n_accessed < self.n_points:
-            d = OrderedDict()
+    def _next(self):
+        trials = 0
+        while True:
+            self.current_point = OrderedDict()
             for h in self.h_params:
                 if isinstance(h, Choice):
-                    d[h.name] = random.choice(h.values)
+                    self.current_point[h.name] = random.choice(h.values)
                 elif isinstance(h, Linear):
                     if isinstance(h.start, int) and isinstance(h.stop, int):
-                        d[h.name] = random.randint(a=h.start, b=h.stop)  # both endpoints included
+                        self.current_point[h.name] = random.randint(a=h.start, b=h.stop)  # both endpoints included
                     else:
-                        d[h.name] = random.uniform(a=h.start, b=h.stop)
+                        self.current_point[h.name] = random.uniform(a=h.start, b=h.stop)
                 elif isinstance(h, Exponential):
-                    v = h.start * ( (h.stop/h.start) ** random.random() )
+                    v = h.start * ((h.stop / h.start) ** random.random())
                     if isinstance(h.start, int) and isinstance(h.stop, int):
-                        d[h.name] = round(v)
+                        self.current_point[h.name] = round(v)
                     else:
-                        d[h.name] = v
+                        self.current_point[h.name] = v
 
-            for h in self.dependent:
-                d[h.name] = h.f(**{k: d[k] for k in d if k in h.superior_h_params})
-            if self._satisfy_constraints(d):
-                self.n_accessed += 1
-                yield d
+            self._process_dependent()
 
-    def _proper_summary(self):
+            if self._satisfy_constraints(self.current_point):
+                self.n_explored += 1
+                break
+
+            trials +=1
+            if trials > Random.MAX_TRIALS:
+                warnings.warn('Could not satisfy constraints in {} trials. Check if your constraints are correct. '
+                              'You can change number of trials by setting Random.MAX_TRIALS. '
+                              'If you are not afraid of infinite loop, set it to math.inf')
+                raise StopIteration  # aka return
+
+    def _show_h_params(self):
         s = ''
         for h in self.h_params:
             s += '        {:20} {} \n'.format(h.name, h.__class__.__name__)

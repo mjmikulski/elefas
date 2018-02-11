@@ -18,7 +18,7 @@ space.add(Constraint('learning_speed', f=lambda learning_rate, batch_size: learn
 
 space.compile()
 
-for p in space():
+for p in space:
     print(p)
 
 

@@ -14,7 +14,7 @@ space.add(Exponential('dense_size', 8, 256), step=2)
 
 space.compile()
 
-for p in space():
+for p in space:
     print(p)
 
 space.summary()

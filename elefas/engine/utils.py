@@ -16,14 +16,21 @@ def normalize(x_train, x_test):
     return x_train_normalized, x_test_normalized
 
 
-def rough_timedelta(seconds=0):
-    if seconds < 100:
+def rough_timedelta(seconds):
+    seconds = abs(seconds)
+
+    if seconds < 1:
+        return 'less than 1 second'
+    if seconds < 5:
+        return '{:.1f} seconds'.format(seconds)
+
+    if seconds < 120:
         return '{:.0f} seconds'.format(seconds)
     if seconds < 600:
         return '{:.0f} minutes {:.0f} seconds'.format(seconds // 60, seconds % 60)
 
     minutes = seconds / 60
-    if minutes < 100:
+    if minutes < 120:
         return '{:.0f} minutes'.format(minutes)
     if minutes < 600:
         return '{:.0f} hours {:.0f} minutes'.format(minutes // 60, minutes % 60)

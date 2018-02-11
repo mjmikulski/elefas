@@ -13,7 +13,7 @@ space.add(Linear('batch_size', 10, 100))
 
 space.compile()
 
-for p in space():
+for p in space:
     print(p)
 
 space.summary()
