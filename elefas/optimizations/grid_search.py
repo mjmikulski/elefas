@@ -1,8 +1,6 @@
 from collections import OrderedDict
 from copy import deepcopy
 
-import numpy as np
-
 from ..hyperparameters import *
 
 
@@ -11,7 +9,6 @@ class Grid(Search):
         super().__init__()
         self.spectra = []
         self.hyper_pointer = None
-        self.n_points = 0
 
     def add(self, h_param, *, n=None, step=None):
         if self.compiled:

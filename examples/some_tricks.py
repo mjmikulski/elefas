@@ -18,7 +18,7 @@ space.add(Constraint('limited_dropout', f=lambda dense01_dropout, dense02_dim: d
 space.compile()
 
 for p in space:
-    print(p)
+    space.status()
     sleep(0.5)
 
 space.summary()

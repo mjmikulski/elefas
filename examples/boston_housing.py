@@ -23,7 +23,7 @@ print(f'x_test.shape: {x_test.shape}')
 
 # define hyper-parameters
 from datetime import timedelta
-space = Random(time_limit=(timedelta(minutes=3)))
+space = Random(points=100, time_limit=(timedelta(minutes=1)))
 
 space.add(Exponential('dense_1_units', 20, 100))
 space.add(Exponential('dense_2_units', 10, 50))
@@ -46,8 +46,7 @@ best_loss = math.inf
 best_p = None
 
 for p in space:
-    print('Iteration: {} of {}'.format(space.n_explored, space.n_points))
-    print('Exploring: ', p)
+    space.status()
 
     model = Sequential()
 

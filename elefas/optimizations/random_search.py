@@ -2,7 +2,6 @@ import math
 import random
 from collections import OrderedDict
 from copy import deepcopy
-
 from datetime import timedelta
 
 from ..hyperparameters import *
@@ -46,11 +45,13 @@ class Random(Search):
             raise TypeError('Unexpected hyperparameter added to Random search')
 
     def __next__(self):
-        if self.n_explored < self.n_points and self.enough_time():
-            self._next()
-            return self.current_point
-        else:
-            raise StopIteration
+        if self.n_explored >= self.n_points:
+            raise StopIteration('All points done')
+        if not self.enough_time():
+            raise StopIteration('Time limit')
+
+        self._next()
+        return self.current_point
 
     def _next(self):
         trials = 0
@@ -82,7 +83,7 @@ class Random(Search):
                 warnings.warn('Could not satisfy constraints in {} trials. Check if your constraints are correct. '
                               'You can change number of trials by setting Random.MAX_TRIALS. '
                               'If you are not afraid of infinite loop, set it to math.inf')
-                raise StopIteration  # aka return
+                raise StopIteration('Number of MAX_TRIALS exceeded')
 
     def _show_h_params(self):
         s = ''

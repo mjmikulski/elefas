@@ -1,6 +1,8 @@
 import time
 import warnings
 
+import math
+
 from .utils import rough_timedelta
 
 
@@ -16,6 +18,7 @@ class Search:
 
         self.current_point = None
 
+        self.n_points = math.inf
         self.n_explored = 0
         self.compiled = False
         self.time_start = 0
@@ -94,3 +97,7 @@ class Search:
         if not self.compiled:
             raise RuntimeError('Compile space before accessing points')
         return self
+
+    def status(self, print_fn=print):
+        s = 'Current point: {:4} of {} : {}'.format(self.n_explored, self.n_points, list(self.current_point.items()))
+        print_fn(s)
