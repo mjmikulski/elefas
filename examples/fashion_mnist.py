@@ -7,9 +7,11 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 
 from elefas.engine import normalize
-from elefas.hyperparameters import Exponential, Linear, Dependent
+from elefas.hyperparameters import Exponential, Linear, Dependent, Constraint
 from elefas.optimizations import Random
 
+
+# load and prepare data
 num_classes = 10
 img_rows, img_cols = 28, 28
 
@@ -35,9 +37,7 @@ print(x_test.shape[0], 'test samples')
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
-batch_size = 128
-epochs = 12
-
+# add hyper-parameters
 space = Random(time_limit=timedelta(hours=6))
 
 space.add(Linear('conv_dropout', 0, 0.3))
@@ -45,7 +45,9 @@ space.add(Dependent('dense_dropout', f=lambda conv_dropout: 2 * conv_dropout))
 
 space.add(Exponential('batch_size', 4, 256))
 space.add(Exponential('lr', 1e-4, 1e-2))
-space.add(Exponential('epochs', 5, 50))
+space.add(Linear('epochs', 5, 20))
+
+space.add(Constraint('skip slow convergence', f=lambda lr, batch_size: lr/batch_size > 1e-5 ))
 
 space.compile()
 
@@ -53,8 +55,9 @@ best_p = None
 best_accuracy = 0
 
 for p in space:
-    space.status()
+    space.status()  # show current point
 
+    # build model using hyper-parameters
     model = Sequential()
     model.add(Conv2D(32, kernel_size=(3, 3),
                      activation='relu',
@@ -76,6 +79,7 @@ for p in space:
               epochs=p['epochs'],
               verbose=2,
               validation_data=(x_test, y_test))
+
     loss, accuracy = model.evaluate(x_test, y_test, verbose=2)
     print('Test loss:', loss)
     print('Test accuracy:', accuracy)
@@ -90,4 +94,5 @@ for p in space:
     print('')
 
 print(f'Best is {best_accuracy:.2f} for {best_p}')
+
 space.summary()
