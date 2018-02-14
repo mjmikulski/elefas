@@ -3,6 +3,7 @@ import warnings
 
 import math
 
+from elefas.engine.scores import Scores, Score
 from .utils import rough_timedelta
 
 
@@ -23,6 +24,11 @@ class Search:
         self.compiled = False
         self.time_start = 0
         self.time_elapsed = 0
+
+        self.scores = Scores()
+        self.best = self.scores.best
+        self.best_p = self.scores.best_p
+        self.best_sp = self.scores.best_sp
 
     def compile(self):
         if self.compiled:
@@ -101,3 +107,8 @@ class Search:
     def status(self, print_fn=print):
         s = 'Current point: {:4} of {} : {}'.format(self.n_explored, self.n_points, list(self.current_point.items()))
         print_fn(s)
+
+    def add_score(self, **kwargs):
+        s = Score(self.n_explored, self.current_point, kwargs)
+        self.scores.add(s)
+

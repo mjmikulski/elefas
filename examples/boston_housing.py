@@ -23,7 +23,8 @@ print(f'x_test.shape: {x_test.shape}')
 
 # define hyper-parameters
 from datetime import timedelta
-space = Random(points=100, time_limit=(timedelta(minutes=15)))
+# space = Random(points=100, time_limit=(timedelta(minutes=15)))
+space = Random(points=3)
 
 space.add(Exponential('dense_1_units', 20, 100))
 space.add(Exponential('dense_2_units', 10, 50))
@@ -41,9 +42,6 @@ space.add(Exponential('batch_size', 8, 64))
 space.add(Linear('epochs', 300, 1200))
 
 space.compile()
-
-best_loss = math.inf
-best_p = None
 
 for p in space:
     space.status()
@@ -72,9 +70,7 @@ for p in space:
 
     opt = SGD(lr=p['lr'], momentum=p['momentum'], nesterov=p['nesterov'])
 
-    model.compile(optimizer=opt, loss='mape')
-
-    model.summary()
+    model.compile(optimizer=opt, loss='mse')
 
     model.fit(x_train, y_train,
               batch_size=p['batch_size'],
@@ -83,18 +79,13 @@ for p in space:
               shuffle=True,
               verbose=0)
 
-    # Score trained model.
+    # Evaluate trained model and save the score.
     loss = model.evaluate(x_test, y_test, verbose=2)
     print(f'Test loss: {loss:.2f}')
+    space.add_score(loss=loss)
 
-    if loss < best_loss:
-        best_loss = loss
-        best_p = p
-        print('This is new best loss')
-    else:
-        print(f'Best loss so far is {best_loss:.2f}')
 
-    print('')
-
-print(f'Best is {best_loss:.2f} for {best_p}')
 space.summary()
+
+best_loss, best_p = space.best_sp('loss', highest_is_best=False)
+print(f'Best is {best_loss:.2f} for {best_p}')
