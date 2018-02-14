@@ -95,7 +95,7 @@ class Search:
 
     def __iter__(self):
         if not self.compiled:
-            raise RuntimeError('Compile space before accessing points')
+            raise RuntimeError('Compile space before exploring it.')
         return self
 
     def status(self, print_fn=print):

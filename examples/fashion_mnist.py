@@ -17,6 +17,10 @@ img_rows, img_cols = 28, 28
 
 (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
 
+# limit data
+(x_train, y_train) = (x_train[:2000], y_train[:2000])
+(x_test, y_test) = (x_test[:1000], y_test[:1000])
+
 if K.image_data_format() == 'channels_first':
     x_train = x_train.reshape(x_train.shape[0], 1, img_rows, img_cols)
     x_test = x_test.reshape(x_test.shape[0], 1, img_rows, img_cols)
@@ -38,16 +42,16 @@ y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
 # add hyper-parameters
-space = Random(time_limit=timedelta(hours=6))
+space = Random(time_limit=timedelta(minutes=20))
 
 space.add(Linear('conv_dropout', 0, 0.3))
 space.add(Dependent('dense_dropout', f=lambda conv_dropout: 2 * conv_dropout))
 
-space.add(Exponential('batch_size', 4, 256))
+space.add(Exponential('batch_size', 4, 128))
 space.add(Exponential('lr', 1e-4, 1e-2))
 space.add(Linear('epochs', 5, 20))
 
-space.add(Constraint('skip slow convergence', f=lambda lr, batch_size: lr/batch_size > 1e-5 ))
+space.add(Constraint('skip slow convergence', f=lambda epochs, lr, batch_size: epochs * lr/batch_size > 2e-4 ))
 
 space.compile()
 
@@ -80,6 +84,7 @@ for p in space:
               verbose=2,
               validation_data=(x_test, y_test))
 
+    # evaluate model
     loss, accuracy = model.evaluate(x_test, y_test, verbose=2)
     print('Test loss:', loss)
     print('Test accuracy:', accuracy)

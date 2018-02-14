@@ -23,7 +23,7 @@ print(f'x_test.shape: {x_test.shape}')
 
 # define hyper-parameters
 from datetime import timedelta
-space = Random(points=100, time_limit=(timedelta(minutes=1)))
+space = Random(points=100, time_limit=(timedelta(minutes=15)))
 
 space.add(Exponential('dense_1_units', 20, 100))
 space.add(Exponential('dense_2_units', 10, 50))
@@ -72,7 +72,9 @@ for p in space:
 
     opt = SGD(lr=p['lr'], momentum=p['momentum'], nesterov=p['nesterov'])
 
-    model.compile(optimizer=opt, loss='mse')
+    model.compile(optimizer=opt, loss='mape')
+
+    model.summary()
 
     model.fit(x_train, y_train,
               batch_size=p['batch_size'],

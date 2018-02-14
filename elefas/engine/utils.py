@@ -6,9 +6,11 @@ def magnitude(x):
     return 3 - floor(log10(x))
 
 
-def normalize(x_train, x_test):
+def normalize(x_train, x_test, epsilon=1e-07):
     mu = np.nanmean(x_train, axis=0)
     std = np.nanstd(x_train, axis=0)
+
+    std = np.clip(std, epsilon, None)
 
     x_train_normalized = (x_train - mu) / std
     x_test_normalized = (x_test - mu) / std
@@ -43,3 +45,8 @@ def rough_timedelta(seconds):
 
     days = hours / 24
     return '{:.0f} days'.format(days)
+
+def dict_to_str(d):
+    s = ''
+    for k, v in d.items():
+        s += '{:8}: {}'.format(k, v)
