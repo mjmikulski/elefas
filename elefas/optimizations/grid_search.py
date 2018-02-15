@@ -1,7 +1,11 @@
 from collections import OrderedDict
-from copy import deepcopy
+import numpy as np
+import time
 
-from ..hyperparameters import *
+from elefas.engine.utils import magnitude, rough_timedelta
+from elefas.engine.hyper_pointer import HyperPointer
+from elefas.hyperparameters import *
+from .search import Search
 
 
 class Grid(Search):
@@ -11,58 +15,33 @@ class Grid(Search):
         self.hyper_pointer = None
 
     def add(self, h_param, *, n=None, step=None):
-        if self.compiled:
-            raise RuntimeError('You cannot add hyper-parameters after space was compiled')
+        self._add(h_param, n=n, step=step)
 
-        if isinstance(h_param.name, list):
-            names = h_param.name
-            for name in names:
-                h = deepcopy(h_param)
-                h.name = name
-                self._add(h, n, step)
-        else:
-            h = deepcopy(h_param)
-            self._add(h, n, step)
-
-    def _add(self, h, n, step):
-        if isinstance(h, NumericHyperParameter):
-            self._add_numeric(h, n, step)
-
-        elif isinstance(h, Constant):
-            self.constants.append(h)
-
-        elif isinstance(h, Choice):
-            self.h_params.append(h)
-            self.spectra.append(len(h.values))
-
-        elif isinstance(h, Constraint):
-            self.constrains.append(h)
-
-        elif isinstance(h, Dependent):
-            self.dependent.append(h)
-        else:
-            raise TypeError('Unexpected hyperparameter added to Grid search')
-
-    def _add_numeric(self, h, n, step):
-        def mold(x):
-            return round(x, magn)
-
-        points = []
+    def _add_numeric(self, h, **kwargs):
+        n = kwargs.get('n', None)
+        step = kwargs.get('step', None)
         if n is not None and step is not None:
             raise ValueError('You can pass either number of points to explore or step, not both.')
         if n is None and step is None:
             n = 5
+
+        points = []
+
+        def mold(x):
+            return round(x, magn)
+
         if n is not None:
             if isinstance(h, Linear):
                 magn = magnitude((h.stop - h.start) / n)
-                if isinstance(h.start, int) and isinstance(h.stop, int):
+                if h.is_int():
                     points = np.around(np.linspace(h.start, h.stop, num=n)).astype(int).tolist()
                 else:
                     points = np.linspace(h.start, h.stop, num=n).tolist()
                     points = list(map(mold, points))
+
             elif isinstance(h, Exponential):
                 magn = magnitude(h.start)
-                if isinstance(h.start, int) and isinstance(h.stop, int):
+                if h.is_int():
                     points = np.around(np.geomspace(h.start, h.stop, num=n)).astype(int).tolist()
                 else:
                     points = np.geomspace(h.start, h.stop, num=n).tolist()
@@ -85,11 +64,13 @@ class Grid(Search):
                     points.append(x)
                     x *= step
                 points.append(h.stop)
+
         h.values = points
         self.h_params.append(h)
-        self.spectra.append(len(h.values))
 
     def _compile(self):
+        for h in self.h_params:
+            self.spectra.append(len(h.values))
         self.hyper_pointer = HyperPointer(self.spectra)
         self.n_points = np.prod(self.spectra)
 

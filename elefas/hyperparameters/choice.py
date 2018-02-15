@@ -1,4 +1,5 @@
-from ..engine import BaseHyperParameter
+from .base_hyper import BaseHyperParameter
+
 
 
 class Constant(BaseHyperParameter):

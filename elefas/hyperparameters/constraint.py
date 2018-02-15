@@ -1,6 +1,6 @@
 from inspect import getfullargspec
 
-from ..engine import BaseHyperParameter
+from .base_hyper import BaseHyperParameter
 
 
 class Constraint(BaseHyperParameter):
@@ -12,4 +12,3 @@ class Constraint(BaseHyperParameter):
 
     def __str__(self):
         return f'{self.name} <Constraint that depends on {self.constrained_h_params}>'
-

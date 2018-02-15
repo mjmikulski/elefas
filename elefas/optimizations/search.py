@@ -1,10 +1,11 @@
+import math
 import time
 import warnings
-
-import math
+from copy import deepcopy
 
 from elefas.engine.scores import Scores, Score
-from .utils import rough_timedelta
+from elefas.engine.utils import rough_timedelta
+from elefas.hyperparameters import Choice, Constant, Dependent, Constraint, NumericHyperParameter
 
 
 class Search:
@@ -14,9 +15,9 @@ class Search:
 
     def __init__(self):
         self.h_params = []
+        self.constants = []
         self.dependent = []
         self.constrains = []
-        self.constants = []
 
         self.current_point = None
 
@@ -30,6 +31,42 @@ class Search:
         self.best = self.scores.best
         self.best_p = self.scores.best_p
         self.best_sp = self.scores.best_sp
+
+    def _add(self, h_param, **kwargs):
+        if self.compiled:
+            raise RuntimeError('You cannot add hyper-parameters after space was compiled')
+
+        if isinstance(h_param.name, list):
+            names = h_param.name
+            for name in names:
+                h = deepcopy(h_param)
+                h.name = name
+                self.__add(h, **kwargs)
+        else:
+            h = deepcopy(h_param)
+            self.__add(h, **kwargs)
+
+    def __add(self, h_param, **kwargs):
+        if isinstance(h_param, NumericHyperParameter):
+            self._add_numeric(h_param, **kwargs)
+
+        elif isinstance(h_param, Choice):
+            self.h_params.append(h_param)
+
+        elif isinstance(h_param, Constant):
+            self.constants.append(h_param)
+
+        elif isinstance(h_param, Dependent):
+            self.dependent.append(h_param)
+
+        elif isinstance(h_param, Constraint):
+            self.constrains.append(h_param)
+
+        else:
+            raise TypeError('Unexpected type of hyperparameter')
+
+    def _add_numeric(self, h_param, **kwargs):
+        self.h_params.append(h_param)
 
     def compile(self):
         if self.compiled:
@@ -97,6 +134,15 @@ class Search:
         s += '_' * 80 + '\n'
         return s
 
+    def _update_with_constants(self):
+        for c in self.constants:
+            self.current_point[c.name] = c.value
+
+    def _update_with_dependent(self):
+        for h in self.dependent:
+            self.current_point[h.name] = h.f(
+                **{k: self.current_point[k] for k in self.current_point if k in h.superior_h_params})
+
     def _satisfy_constraints(self):
         p = self.current_point
         for c in self.constrains:
@@ -105,15 +151,6 @@ class Search:
                 c.n_points_rejected += 1
                 return False
         return True
-
-    def _update_with_dependent(self):
-        for h in self.dependent:
-            self.current_point[h.name] = h.f(
-                **{k: self.current_point[k] for k in self.current_point if k in h.superior_h_params})
-
-    def _update_with_constants(self):
-        for c in self.constants:
-            self.current_point[c.name] = c.value
 
     def __iter__(self):
         if not self.compiled:

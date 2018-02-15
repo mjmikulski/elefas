@@ -1,6 +1,5 @@
 import math
 import time
-from collections import OrderedDict
 
 
 class Score:
@@ -22,7 +21,8 @@ class Scores:
         if highest_is_best:
             return max(self.scores, key=lambda x: x.scores_dict.get(metrics, -math.inf), default=-math.inf)
         else:
-            return min(self.scores, key=lambda x: x.scores_dict.get(metrics, math.inf), default=math.inf)  # note different default
+            return min(self.scores, key=lambda x: x.scores_dict.get(metrics, math.inf),
+                       default=math.inf)  # note different default
 
     def best_p(self, metrics, highest_is_best=True):  # maybe delete
         return self.best(metrics, highest_is_best).hyper_point

@@ -1,6 +1,6 @@
 from inspect import getfullargspec
 
-from ..engine import BaseHyperParameter
+from .base_hyper import BaseHyperParameter
 
 
 class Dependent(BaseHyperParameter):
