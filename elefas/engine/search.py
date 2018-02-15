@@ -87,12 +87,13 @@ class Search:
         if len(self.constants) > 0:
             s += 'Constants:\n'
             for c in self.constants:
-                s += '        {} {}\n'.format(c.name, c.value)
+                s += '        {:20} {}\n'.format(c.name, c.value)
         return s
 
     def _end_summary(self):
         self.time_elapsed = time.time() - self.time_start
-        s = 'Explored {} points in {}\n'.format(self.n_explored, rough_timedelta(self.time_elapsed))
+        s = '=' * 80 + '\n'
+        s += 'Explored {} points in {}\n'.format(self.n_explored, rough_timedelta(self.time_elapsed))
         s += '_' * 80 + '\n'
         return s
 
@@ -110,7 +111,7 @@ class Search:
             self.current_point[h.name] = h.f(
                 **{k: self.current_point[k] for k in self.current_point if k in h.superior_h_params})
 
-    def _add_constants(self):
+    def _update_with_constants(self):
         for c in self.constants:
             self.current_point[c.name] = c.value
 

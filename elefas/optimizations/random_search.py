@@ -73,7 +73,7 @@ class Random(Search):
                         self.current_point[h.name] = v
 
             self._process_dependent()
-            self._add_constants()
+            self._update_with_constants()
 
             if self._satisfy_constraints():
                 self.n_explored += 1

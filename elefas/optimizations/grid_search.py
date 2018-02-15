@@ -61,27 +61,12 @@ class Grid(Search):
             self.hyper_pointer.move()
 
             self._process_dependent()
-
-            if self._satisfy_constraints(self.current_point):
-                self.n_explored += 1
-                return
-        raise StopIteration
-
-    def __call__(self, *args, **kwargs):
-
-        while not self.hyper_pointer.done:
-            pos = self.hyper_pointer.get()
-            self.current_point = OrderedDict()
-            for i, h in enumerate(self.h_params):
-                self.current_point[h.name] = h.values[pos[i]]
-
-            self._process_dependent()
-            self._add_constants()
+            self._update_with_constants()
 
             if self._satisfy_constraints():
                 self.n_explored += 1
-                yield self.current_point
-            self.hyper_pointer.move()
+                return
+        raise StopIteration
 
     def _show_h_params(self):
         s = ''
@@ -90,8 +75,9 @@ class Grid(Search):
         return s
 
     def _end_summary(self):
+        self.time_elapsed = time.time() - self.time_start
         s = '=' * 80 + '\n'
-        s += 'Points accessed: {}/{}\n'.format(self.n_explored, self.n_points)
+        s += 'Explored {}/{} points in {}\n'.format(self.n_explored, self.n_points, rough_timedelta(self.time_elapsed))
         s += '_' * 80 + '\n'
         return s
 
