@@ -9,7 +9,7 @@ from keras.optimizers import SGD
 
 from elefas.engine import normalize
 from elefas.hyperparameters import Exponential, Linear, Dependent, Constraint, Constant
-from elefas.optimizations import Random, Grid
+from elefas.spaces import Random, Grid
 
 # load and prepare data
 num_classes = 10

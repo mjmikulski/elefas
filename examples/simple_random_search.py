@@ -1,5 +1,5 @@
 from elefas.hyperparameters import Choice, Linear, Exponential
-from elefas.optimizations import Random
+from elefas.spaces import Random
 
 space = Random(points=20)
 

@@ -10,7 +10,7 @@ from elefas.hyperparameters import Choice, Constant, Dependent, Constraint, Nume
 
 class Search:
     """
-    This is a base class for all searches. It should not be instantiated. Use concrete implementations instead.
+    This is a base class for all spaces. It should not be instantiated. Use concrete implementations instead.
     """
 
     def __init__(self):

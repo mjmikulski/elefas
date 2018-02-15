@@ -1,7 +1,7 @@
 from time import sleep
 
 from elefas.hyperparameters import Linear, Choice, Dependent, Constraint
-from elefas.optimizations import Grid, Random
+from elefas.spaces import Grid, Random
 
 space = Random(time_limit=15)
 

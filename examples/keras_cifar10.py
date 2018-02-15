@@ -12,7 +12,7 @@ from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 
 from elefas.hyperparameters import Choice, Linear, Exponential, Boolean
-from elefas.optimizations import Random
+from elefas.spaces import Random
 
 SAVE_DIR = os.path.join(os.getcwd(), 'saved_models')
 NUM_CLASSES = 10

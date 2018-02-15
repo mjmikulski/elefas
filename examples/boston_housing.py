@@ -8,7 +8,7 @@ from keras.optimizers import SGD
 
 from elefas.engine import normalize
 from elefas.hyperparameters import Linear, Exponential, Choice, Boolean, Constraint
-from elefas.optimizations import Random
+from elefas.spaces import Random
 
 
 # fix seed

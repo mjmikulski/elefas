@@ -1,4 +1,4 @@
-from elefas.optimizations import Grid
+from elefas.spaces import Grid
 from elefas.hyperparameters import Choice, Linear, Exponential
 
 space = Grid()

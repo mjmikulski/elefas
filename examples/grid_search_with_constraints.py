@@ -1,5 +1,5 @@
 from elefas.hyperparameters import Boolean, Linear, Exponential, Constraint
-from elefas.optimizations import Grid
+from elefas.spaces import Grid
 
 space = Grid()
 

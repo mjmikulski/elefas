@@ -8,7 +8,7 @@ from keras import backend as K
 
 from elefas.engine import normalize
 from elefas.hyperparameters import Exponential, Linear, Dependent, Constraint
-from elefas.optimizations import Random
+from elefas.spaces import Random
 
 
 # load and prepare data
