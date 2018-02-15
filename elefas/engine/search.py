@@ -16,6 +16,7 @@ class Search:
         self.h_params = []
         self.dependent = []
         self.constrains = []
+        self.constants = []
 
         self.current_point = None
 
@@ -46,6 +47,7 @@ class Search:
         s += self._show_h_params()
         s += self._show_dependent()
         s += self._show_constraints()
+        s += self._show_constants()
         s += self._end_summary()
         print_fn(s)
 
@@ -80,15 +82,24 @@ class Search:
                 s += '{:>6}  {:20} {}\n'.format(c.n_points_rejected, c.name, signature(c.f))
         return s
 
+    def _show_constants(self):
+        s = ''
+        if len(self.constants) > 0:
+            s += 'Constants:\n'
+            for c in self.constants:
+                s += '        {} {}\n'.format(c.name, c.value)
+        return s
+
     def _end_summary(self):
         self.time_elapsed = time.time() - self.time_start
         s = 'Explored {} points in {}\n'.format(self.n_explored, rough_timedelta(self.time_elapsed))
         s += '_' * 80 + '\n'
         return s
 
-    def _satisfy_constraints(self, d):
+    def _satisfy_constraints(self):
+        p = self.current_point
         for c in self.constrains:
-            kwargs = {k: d[k] for k in d if k in c.constrained_h_params}
+            kwargs = {k: p[k] for k in p if k in c.constrained_h_params}
             if not c.f(**kwargs):
                 c.n_points_rejected += 1
                 return False
@@ -98,6 +109,10 @@ class Search:
         for h in self.dependent:
             self.current_point[h.name] = h.f(
                 **{k: self.current_point[k] for k in self.current_point if k in h.superior_h_params})
+
+    def _add_constants(self):
+        for c in self.constants:
+            self.current_point[c.name] = c.value
 
     def __iter__(self):
         if not self.compiled:

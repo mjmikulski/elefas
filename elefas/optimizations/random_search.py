@@ -73,14 +73,15 @@ class Random(Search):
                         self.current_point[h.name] = v
 
             self._process_dependent()
+            self._add_constants()
 
-            if self._satisfy_constraints(self.current_point):
+            if self._satisfy_constraints():
                 self.n_explored += 1
                 break
 
             trials +=1
             if trials > Random.MAX_TRIALS:
-                warnings.warn('Could not satisfy constraints in {} trials. Check if your constraints are correct. '
+                warnings.warn(f'Could not satisfy constraints in {trials} trials. Check if your constraints are correct. '
                               'You can change number of trials by setting Random.MAX_TRIALS. '
                               'If you are not afraid of infinite loop, set it to math.inf')
                 raise StopIteration('Number of MAX_TRIALS exceeded')

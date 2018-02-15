@@ -28,6 +28,9 @@ class Grid(Search):
         if isinstance(h, NumericHyperParameter):
             self._add_numeric(h, n, step)
 
+        elif isinstance(h, Constant):
+            self.constants.append(h)
+
         elif isinstance(h, Choice):
             self.h_params.append(h)
             self.spectra.append(len(h.values))
@@ -73,8 +76,9 @@ class Grid(Search):
                 self.current_point[h.name] = h.values[pos[i]]
 
             self._process_dependent()
+            self._add_constants()
 
-            if self._satisfy_constraints(self.current_point):
+            if self._satisfy_constraints():
                 self.n_explored += 1
                 yield self.current_point
             self.hyper_pointer.move()
