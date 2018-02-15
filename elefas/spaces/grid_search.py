@@ -63,6 +63,8 @@ class Grid(Search):
                 while x < h.stop:
                     points.append(x)
                     x *= step
+                if h.is_int():
+                    points = np.unique(np.around(points).astype(int)).tolist()
                 points.append(h.stop)
 
         h.values = points
