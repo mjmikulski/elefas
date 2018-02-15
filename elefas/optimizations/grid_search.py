@@ -37,49 +37,11 @@ class Grid(Search):
 
         elif isinstance(h, Constraint):
             self.constrains.append(h)
-            h.n_points_rejected = 0
 
         elif isinstance(h, Dependent):
             self.dependent.append(h)
         else:
             raise TypeError('Unexpected hyperparameter added to Grid search')
-
-    def _compile(self):
-        self.hyper_pointer = HyperPointer(self.spectra)
-        self.n_points = np.prod(self.spectra)
-
-    def __next__(self):
-        self._next()
-        return self.current_point
-
-    def _next(self):
-        while not self.hyper_pointer.done:
-            self.current_point = OrderedDict()
-            pos = self.hyper_pointer.get()
-            for i, h in enumerate(self.h_params):
-                self.current_point[h.name] = h.values[pos[i]]
-            self.hyper_pointer.move()
-
-            self._process_dependent()
-            self._update_with_constants()
-
-            if self._satisfy_constraints():
-                self.n_explored += 1
-                return
-        raise StopIteration
-
-    def _show_h_params(self):
-        s = ''
-        for h in self.h_params:
-            s += '  {:>4}  {:20} {} \n'.format(len(h.values), h.name, str(list(h.values)))
-        return s
-
-    def _end_summary(self):
-        self.time_elapsed = time.time() - self.time_start
-        s = '=' * 80 + '\n'
-        s += 'Explored {}/{} points in {}\n'.format(self.n_explored, self.n_points, rough_timedelta(self.time_elapsed))
-        s += '_' * 80 + '\n'
-        return s
 
     def _add_numeric(self, h, n, step):
         def mold(x):
@@ -126,3 +88,40 @@ class Grid(Search):
         h.values = points
         self.h_params.append(h)
         self.spectra.append(len(h.values))
+
+    def _compile(self):
+        self.hyper_pointer = HyperPointer(self.spectra)
+        self.n_points = np.prod(self.spectra)
+
+    def __next__(self):
+        self._next()
+        return self.current_point
+
+    def _next(self):
+        while not self.hyper_pointer.done:
+            self.current_point = OrderedDict()
+            pos = self.hyper_pointer.get()
+            for i, h in enumerate(self.h_params):
+                self.current_point[h.name] = h.values[pos[i]]
+            self.hyper_pointer.move()
+
+            self._update_with_dependent()
+            self._update_with_constants()
+
+            if self._satisfy_constraints():
+                self.n_explored += 1
+                return
+        raise StopIteration
+
+    def _show_h_params(self):
+        s = ''
+        for h in self.h_params:
+            s += '  {:>4}  {:20} {} \n'.format(len(h.values), h.name, str(list(h.values)))
+        return s
+
+    def _end_summary(self):
+        self.time_elapsed = time.time() - self.time_start
+        s = '=' * 80 + '\n'
+        s += 'Explored {}/{} points in {}\n'.format(self.n_explored, self.n_points, rough_timedelta(self.time_elapsed))
+        s += '_' * 80 + '\n'
+        return s

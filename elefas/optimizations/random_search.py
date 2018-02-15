@@ -8,7 +8,7 @@ from ..hyperparameters import *
 
 
 class Random(Search):
-    MAX_TRIALS = 10000
+    MAX_TRIALS = 100000
     def __init__(self, points=math.inf, time_limit=math.inf):
         super().__init__()
         self.n_points = points
@@ -37,7 +37,6 @@ class Random(Search):
 
         elif isinstance(h, Constraint):
             self.constrains.append(h)
-            h.n_points_rejected = 0
 
         elif isinstance(h, Dependent):
             self.dependent.append(h)
@@ -61,18 +60,18 @@ class Random(Search):
                 if isinstance(h, Choice):
                     self.current_point[h.name] = random.choice(h.values)
                 elif isinstance(h, Linear):
-                    if isinstance(h.start, int) and isinstance(h.stop, int):
+                    if h.is_int():
                         self.current_point[h.name] = random.randint(a=h.start, b=h.stop)  # both endpoints included
                     else:
                         self.current_point[h.name] = random.uniform(a=h.start, b=h.stop)
                 elif isinstance(h, Exponential):
                     v = h.start * ((h.stop / h.start) ** random.random())
-                    if isinstance(h.start, int) and isinstance(h.stop, int):
+                    if h.is_int():
                         self.current_point[h.name] = round(v)
                     else:
                         self.current_point[h.name] = v
 
-            self._process_dependent()
+            self._update_with_dependent()
             self._update_with_constants()
 
             if self._satisfy_constraints():

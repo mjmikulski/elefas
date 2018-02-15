@@ -18,8 +18,8 @@ img_rows, img_cols = 28, 28
 (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
 
 # limit data
-# (x_train, y_train) = (x_train[:6000], y_train[:6000])
-# (x_test, y_test) = (x_test[:1000], y_test[:1000])
+(x_train, y_train) = (x_train[:6000], y_train[:6000])
+(x_test, y_test) = (x_test[:1000], y_test[:1000])
 # on full data it arrives at 91.9% accuracy, 110 sec/epoch on Intel i7-7700K
 # best hyper-parameters set found by this procedure is
 # [('batch_size', 324), ('momentum', 0.9666666666666667), ('lr', 0.027)]

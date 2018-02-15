@@ -106,7 +106,7 @@ class Search:
                 return False
         return True
 
-    def _process_dependent(self):
+    def _update_with_dependent(self):
         for h in self.dependent:
             self.current_point[h.name] = h.f(
                 **{k: self.current_point[k] for k in self.current_point if k in h.superior_h_params})
