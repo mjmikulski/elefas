@@ -18,7 +18,7 @@ img_rows, img_cols = 28, 28
 (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
 
 # limit data
-(x_train, y_train) = (x_train[:6000], y_train[:6000])
+(x_train, y_train) = (x_train[:4000], y_train[:4000])
 (x_test, y_test) = (x_test[:1000], y_test[:1000])
 # on full data it arrives at 91.9% accuracy, 110 sec/epoch on Intel i7-7700K
 # best hyper-parameters set found by this procedure is
@@ -67,7 +67,7 @@ def build_and_fit_model(space):
 
         model.fit(x_train, y_train,
                   batch_size=p['batch_size'],
-                  epochs=12,
+                  epochs=10,
                   verbose=2,
                   validation_data=(x_test, y_test))
 
@@ -84,7 +84,7 @@ def build_and_fit_model(space):
 s1 = Grid()
 
 s1.add(Exponential('batch_size', 4, 256), step=2)
-s1.add(Constant('lr', 0.001))
+s1.add(Constant('lr', 0.01))
 s1.add(Constant('momentum', 0.9))
 
 build_and_fit_model(s1)
@@ -98,8 +98,8 @@ s1.summary()
 best_batch_size = best_point['batch_size']
 
 s2 = Grid()  # in future: Monotonic()
-s2.add(Exponential('batch_size', best_batch_size, 2000), step=3)
-s2.add(Dependent('lr', f=lambda batch_size: 0.001 * batch_size / best_batch_size))
+s2.add(Exponential('batch_size', best_batch_size, 1000), step=3)
+s2.add(Dependent('lr', f=lambda batch_size: 0.01 * batch_size / best_batch_size))
 s2.add(Constant('momentum', 0.9))
 
 build_and_fit_model(s2)
@@ -114,7 +114,7 @@ best_lr = best_point['lr']
 best_batch_size = best_point['batch_size']
 
 s3 = Grid()
-s3.add(Exponential('batch_size', best_batch_size, 6000), step=3)
+s3.add(Exponential('batch_size', best_batch_size, 2000), step=2)
 s3.add(Constant('lr', best_lr))
 s3.add(Dependent('momentum', f=lambda batch_size: 1 - 0.1 * best_batch_size / batch_size))
 
@@ -126,4 +126,18 @@ s3.summary()
 
 
 # phase 4: fine batch_size
-# to be done
+min_bs = int(0.9 * best_point['batch_size'])
+max_bs = 10 + best_point['batch_size']
+
+s4 = Random(points=5)
+s4.add(Constant('lr', best_point['lr']))
+s4.add(Linear('batch_size', min_bs, max_bs))
+s4.add(Constant('momentum', best_point['momentum']))
+
+build_and_fit_model(s4)
+
+best_val_accu, best_point = s4.best_sp('val_accu')
+print(f'Best validation accuracy {best_val_accu:.3f} for {best_point}\n')
+s4.summary()
+
+print('all done')
